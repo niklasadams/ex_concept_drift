@@ -1,0 +1,8 @@
+# run: conda env create --file environment.yml
+name: explainable_concept_drift_experiments
+dependencies:
+- python==3.8.3
+- anaconda
+- pip
+- pip:
+  - -r requirements.txt
