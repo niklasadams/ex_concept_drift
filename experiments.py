@@ -26,7 +26,7 @@ filename = "example_logs/mdl/BPI2017.csv"
 ots = ["application", "offer"]
 
 #UNCOMMENT THE [:20000] for a test run
-event_df = pd.read_csv(filename, sep=',')#[:20000]
+event_df = pd.read_csv(filename, sep=',')[:20000]
 event_df["event_timestamp"] = pd.to_datetime(event_df["event_timestamp"])
 
 
