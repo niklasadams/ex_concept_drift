@@ -1,7 +1,6 @@
 import ocpa.algo
 import ocpa.objects
 import ocpa.util
-import ocpa.visualization
 
 __version__ = '0.0.9'
 __doc__ = "Object-Centric Process Analysis"
