@@ -1,14 +1,12 @@
-from ocpa.visualization.oc_petri_net.versions import control_flow, annotated_with_diagnostics
+from ocpa.visualization.oc_petri_net.versions import control_flow
 from pm4py.visualization.common import gview
 from pm4py.visualization.common import save as gsave
 
 
 CONTROL_FLOW = "control_flow"
-ANNOTATED_WITH_DIAGNOSTICS = "annotated_with_diagnostics"
 
 VERSIONS = {
-    CONTROL_FLOW: control_flow.apply,
-    ANNOTATED_WITH_DIAGNOSTICS: annotated_with_diagnostics.apply
+    CONTROL_FLOW: control_flow.apply
 }
 
 
