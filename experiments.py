@@ -22,11 +22,11 @@ def std_dev(x):
     m = sum(x) / len(x)
     return sum((xi - m) ** 2 for xi in x) / len(x)
 
-filename = "example_logs/mdl/BPI2017.csv"
+filename = "example_logs/mdl/BPI2017_new.csv"
 ots = ["application", "offer"]
 
 #UNCOMMENT THE [:20000] for a test run
-event_df = pd.read_csv(filename, sep=',')[:20000]
+event_df = pd.read_csv(filename, sep=',')#[:20000]
 event_df["event_timestamp"] = pd.to_datetime(event_df["event_timestamp"])
 
 
@@ -43,62 +43,66 @@ print("Number of process executions: "+str(len(ocel.cases)))
 print(ocel.log)
 
 #######EXAMPLE
-# explainable_drifts = []
-# #p value
-# p=0.05
-# s, time_index = time_series.construct_time_series(ocel,timedelta(days=7),
-#                                                           #EVENT BASED FEATURES
-#                                                           [(avg, (feature_extraction.EVENT_NUM_OF_OBJECTS,()))],
-#                                                           #EXECUTION BASED FEATURES
-#                                                           [(avg, (feature_extraction.EXECUTION_THROUGHPUT,()))],
-#                                                           #INCLUSION FUNCTION
-#                                                           ocpa.algo.filtering.log.time_filtering.start)
-# print(s)
-# #CHANGE POINTS OF NORMALIZED TIME SERIES
-# loc = {k:[bp for bp in rpt.Pelt().fit(s[k]/np.max(s[k])).predict(pen=0.2)] for k in s.keys()}
-# print(loc)
-# #ADAPTABLE KERNEL FUNCTION, NEED TO BE APPLIED
-# phi_1 = lambda x:x
-# phi_2 = lambda x:x
-# for feat_1 in s.keys():
-#     for feat_2 in s.keys():
-#         if feat_1== feat_2:
-#             continue
-#         loc_1 = loc[feat_1]
-#         loc_2 = loc[feat_2]
-#         for d in loc_1:
-#             for d_ in loc_2:
-#                 if d_ < d:
-#                     #Granger test
-#                     try:
-#                         res = grangercausalitytests(pd.DataFrame({feat_1:s[feat_1],feat_2:s[feat_2]}),[d-d_])
-#                     except ValueError:
-#                         #insufficient observations are not added
-#                         continue
-#                     #print(res)
-#                     p_value = res[d-d_][0]['ssr_ftest'][1]
-#                     if p_value <= p:
-#                         explainable_drifts.append((feat_1,feat_2,d,d_,p_value))
-#
-# print(explainable_drifts)
-#
-#
-# # ###Visualization
-# data_df = pd.DataFrame({k:s[k] for k in s.keys()})
-# viz_df = pd.concat([pd.DataFrame({"date":time_index}), data_df], axis=1)
-# viz_df.set_index('date', inplace=True)
-# sns.set_style("darkgrid")
-# sns.lineplot(data = viz_df)
-# plt.savefig("time_series_example.png")
-#
-# for feat in s.keys():
-#     plt.clf()
-#     data_df = pd.DataFrame({feat:s[feat]})
-#     viz_df = pd.concat([pd.DataFrame({"date":time_index}), data_df], axis=1)
-#     viz_df.set_index('date', inplace=True)
-#     sns.set_style("darkgrid")
-#     sns.lineplot(data = viz_df)
-#     plt.savefig("time_series_example"+feat[1][0]+".png")
+explainable_drifts = []
+#p value
+p=0.05
+s, time_index = time_series.construct_time_series(ocel,timedelta(days=7),
+                                                          #EVENT BASED FEATURES
+                                                          [(avg, (feature_extraction.EVENT_SERVICE_TIME,("event_start_timestamp","W_Validate application")))],
+                                                          #EXECUTION BASED FEATURES
+                                                          [(sum, (feature_extraction.EXECUTION_IDENTITY,()))],
+                                                          #INCLUSION FUNCTION
+                                                          ocpa.algo.filtering.log.time_filtering.events)
+print(s)
+#cutting some effects of starting and ending recording
+for k in s.keys():
+    s[k] = s[k][4:-4]
+time_index = time_index[4:-4]
+#CHANGE POINTS OF NORMALIZED TIME SERIES
+loc = {k:[bp for bp in rpt.Pelt().fit(s[k]/np.max(s[k])).predict(pen=0.1) if bp != len(s[k]-1)] for k in s.keys()}
+print(loc)
+#ADAPTABLE KERNEL FUNCTION, NEED TO BE APPLIED
+phi_1 = lambda x:x
+phi_2 = lambda x:x
+for feat_1 in s.keys():
+    for feat_2 in s.keys():
+        if feat_1== feat_2:
+            continue
+        loc_1 = loc[feat_1]
+        loc_2 = loc[feat_2]
+        for d in loc_1:
+            for d_ in loc_2:
+                if d_ < d:
+                    #Granger test
+                    try:
+                        res = grangercausalitytests(pd.DataFrame({feat_1:s[feat_1],feat_2:s[feat_2]}),[d-d_])
+                    except ValueError:
+                        #insufficient observations are not added
+                        continue
+                    #print(res)
+                    p_value = res[d-d_][0]['ssr_ftest'][1]
+                    if p_value <= p:
+                        explainable_drifts.append((feat_1,feat_2,d,d_,p_value))
+
+print(explainable_drifts)
+
+
+# ###Visualization
+data_df = pd.DataFrame({k:s[k] for k in s.keys()})
+viz_df = pd.concat([pd.DataFrame({"date":time_index}), data_df], axis=1)
+viz_df.set_index('date', inplace=True)
+sns.set_style("darkgrid")
+sns.lineplot(data = viz_df)
+plt.savefig("time_series_example.png")
+
+for feat in s.keys():
+    plt.clf()
+    data_df = pd.DataFrame({feat:s[feat]})
+    viz_df = pd.concat([pd.DataFrame({"date":time_index}), data_df], axis=1)
+    viz_df.set_index('date', inplace=True)
+    sns.set_style("darkgrid")
+    sns.lineplot(data = viz_df)
+    plt.savefig("time_series_example"+feat[1][0]+".png")
 #######EXAMPLE OVER
 
 
