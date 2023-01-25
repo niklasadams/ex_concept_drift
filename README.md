@@ -1,5 +1,7 @@
 ## Welcome to Explainable Concept Drift in Process Mining
 
+Please use the library [ocpa](https://github.com/ocpm/ocpa) for up-to-date OCPM methods. 
+
 ### This repository provides the code to reproduce the experiments, results and figures provided in the corresponding paper.
 
 First, unzip example_logs/mdl/BPI2017.zip into the same directory, i.e., example_logs/mdl/BPI2017.csv
